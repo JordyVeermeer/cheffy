@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using cheffy_dotnet.Models;
 
@@ -22,14 +17,16 @@ namespace cheffy_dotnet.Controllers
 
         // GET: api/Recipes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipes()
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipes()
         {
-            return await _context.Recipes.ToListAsync();
+            return await _context.Recipes
+                .Select(r => RecipeToDTO(r))
+                .ToListAsync();
         }
 
         // GET: api/Recipes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Recipe>> GetRecipe(long id)
+        public async Task<ActionResult<RecipeDTO>> GetRecipe(long id)
         {
             var recipe = await _context.Recipes.FindAsync(id);
 
@@ -38,20 +35,20 @@ namespace cheffy_dotnet.Controllers
                 return NotFound();
             }
 
-            return recipe;
+            return RecipeToDTO(recipe);
         }
 
         // PUT: api/Recipes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRecipe(long id, Recipe recipe)
+        public async Task<IActionResult> PutRecipe(long id, RecipeDTO recipeDTO)
         {
-            if (id != recipe.Id)
+            if (id != recipeDTO.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(recipe).State = EntityState.Modified;
+            _context.Entry(recipeDTO).State = EntityState.Modified;
 
             try
             {
@@ -75,8 +72,15 @@ namespace cheffy_dotnet.Controllers
         // POST: api/Recipes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Recipe>> PostRecipe(Recipe recipe)
+        public async Task<ActionResult<Recipe>> PostRecipe(RecipeDTO recipeDTO)
         {
+            var recipe = new Recipe
+            {
+                Id = recipeDTO.Id,
+                Name = recipeDTO.Name,
+                Description = recipeDTO.Description,
+            };
+
             _context.Recipes.Add(recipe);
             await _context.SaveChangesAsync();
 
@@ -103,5 +107,13 @@ namespace cheffy_dotnet.Controllers
         {
             return _context.Recipes.Any(e => e.Id == id);
         }
+
+        private static RecipeDTO RecipeToDTO(Recipe recipe) =>
+            new RecipeDTO
+            {
+                Id = recipe.Id,
+                Name = recipe.Name,
+                Description = recipe.Description
+            };
     }
 }
