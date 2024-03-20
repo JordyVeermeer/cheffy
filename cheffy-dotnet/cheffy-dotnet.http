@@ -1,6 +1,7 @@
 @cheffy_dotnet_HostAddress = http://localhost:5119
 
-GET {{cheffy_dotnet_HostAddress}}/weatherforecast/
-Accept: application/json
+### GET all recipes
+GET {{cheffy_dotnet_HostAddress}}/api/recipes
 
-###
+### GET recipe id 10002
+GET {{cheffy_dotnet_HostAddress}}/api/recipes/10002

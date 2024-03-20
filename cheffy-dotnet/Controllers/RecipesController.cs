@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using cheffy_dotnet.Models;
+using cheffy_dotnet.Services;
 
 namespace cheffy_dotnet.Controllers
 {
@@ -8,63 +8,50 @@ namespace cheffy_dotnet.Controllers
     [ApiController]
     public class RecipesController : ControllerBase
     {
-        private readonly RecipeContext _context;
+        //private readonly RecipeContext _context;
+        private readonly RecipeService _recipeService;
 
-        public RecipesController(RecipeContext context)
+        public RecipesController(RecipeService recipeService)
         {
-            _context = context;
+            _recipeService = recipeService;
         }
 
         // GET: api/Recipes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipes()
         {
-            return await _context.Recipes
+            /*return await _context.Recipes
                 .Select(r => RecipeToDTO(r))
-                .ToListAsync();
+                .ToListAsync();*/
+
+            return Ok(await _recipeService.GetAllRecipesAsync());
         }
 
         // GET: api/Recipes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<RecipeDTO>> GetRecipe(long id)
+        public async Task<ActionResult<RecipeDTO>> GetRecipe(int id)
         {
-            var recipe = await _context.Recipes.FindAsync(id);
+            var recipe = await _recipeService.GetRecipeById(id);
 
             if (recipe == null)
             {
                 return NotFound();
             }
 
-            return RecipeToDTO(recipe);
+            return Ok(recipe);
         }
 
         // PUT: api/Recipes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRecipe(long id, RecipeDTO recipeDTO)
+        public async Task<IActionResult> PutRecipe(int id, RecipeDTO recipeDTO)
         {
             if (id != recipeDTO.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(recipeDTO).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RecipeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _recipeService.InsertRecipeAsync(recipeDTO);
 
             return NoContent();
         }
@@ -72,26 +59,29 @@ namespace cheffy_dotnet.Controllers
         // POST: api/Recipes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Recipe>> PostRecipe(RecipeDTO recipeDTO)
+        public async Task<ActionResult<RecipeDTO>> PostRecipe(RecipeDTO recipeDTO)
         {
-            var recipe = new Recipe
-            {
-                Id = recipeDTO.Id,
-                Name = recipeDTO.Name,
-                Description = recipeDTO.Description,
-            };
+            /* var recipe = new Recipe
+             {
+                 Id = recipeDTO.Id,
+                 Name = recipeDTO.Name,
+                 Description = recipeDTO.Description,
+             };
 
-            _context.Recipes.Add(recipe);
-            await _context.SaveChangesAsync();
+             _context.Recipes.Add(recipe);
+             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetRecipe), new { id = recipe.Id }, recipe);
+             return CreatedAtAction(nameof(GetRecipe), new { id = recipe.Id }, recipe);*/
+            await _recipeService.InsertRecipeAsync(recipeDTO);
+            return Ok(recipeDTO);
+
         }
 
         // DELETE: api/Recipes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRecipe(long id)
+        public async Task<IActionResult> DeleteRecipe(int id)
         {
-            var recipe = await _context.Recipes.FindAsync(id);
+            /*var recipe = await _context.Recipes.FindAsync(id);
             if (recipe == null)
             {
                 return NotFound();
@@ -100,10 +90,12 @@ namespace cheffy_dotnet.Controllers
             _context.Recipes.Remove(recipe);
             await _context.SaveChangesAsync();
 
+            return NoContent();*/
+            await _recipeService.DeleteRecipeAsync(id);
             return NoContent();
         }
 
-        private bool RecipeExists(long id)
+        /*private bool RecipeExists(long id)
         {
             return _context.Recipes.Any(e => e.Id == id);
         }
@@ -114,6 +106,6 @@ namespace cheffy_dotnet.Controllers
                 Id = recipe.Id,
                 Name = recipe.Name,
                 Description = recipe.Description
-            };
+            };*/
     }
 }

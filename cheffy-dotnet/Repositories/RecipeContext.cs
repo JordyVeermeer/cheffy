@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using cheffy_dotnet.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace cheffy_dotnet.Models
+namespace cheffy_dotnet.Repositories
 {
     public class RecipeContext : DbContext
     {
-        public RecipeContext(DbContextOptions<RecipeContext> options) : base(options) 
+        public RecipeContext(DbContextOptions<RecipeContext> options) : base(options)
         {
 
         }
